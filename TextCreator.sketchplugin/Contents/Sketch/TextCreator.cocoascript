@@ -1,0 +1,168 @@
+
+// Variables for plugin purpose
+var doc, page, app, layer, layers, layerCount, userDefaults;
+
+// Input variables
+var characterCountInput;
+var characterInput;
+var input = "";
+var inputText = "";
+
+/// By Default on Run method
+function onRun(context) {
+  var doc = context.document;
+  var inputResult = getInputFromUser(context);
+  if (inputResult) {
+    input = getCharacterCountValue(context);
+    inputText = getCharacterValue(context);
+    var count = fillLayers(context.selection)
+    if (count == 0) {
+      [app displayDialog: "Please select some text objects" withTitle: "Oops!"];
+    } else {
+      log("Filled: " + count);
+    }
+  } else {
+    console.log("User has cancelled the alert");
+  }
+}
+
+/// Method used to fill the selected textfield with characters
+function fillLayers(layers) {
+  var count = 0
+  for (var i = 0; i < layers.length; ++i) {
+    var layer = layers[i];
+    if (layer.className() == "MSTextLayer") {
+      var newString = ""
+      for (var j = 0; j < Number(input); ++j) {
+        newString = newString + inputText;
+      }
+      [layer setStringValue: newString];
+      [layer setName: "Created Text"];
+      count += 1;
+    } else if (layer.className() == "MSLayerGroup") {
+      count += fillLayer(layer.layers());
+    }
+  }
+  return count;
+}
+
+/// Method used to initialize the internal variables
+function initVars(context) {
+  doc = context.document;
+  app = [NSApplication sharedApplication];
+  userDefaults = NSUserDefaults.alloc().initWithSuiteName("com.neel.textCreator");
+}
+
+/// Method used to get user input
+function getInputFromUser(context) {
+
+  // Create and show dialog window
+  var window = createWindow(context);
+  var alert = window[0];
+  var response = alert.runModal()
+
+  if (response == "1000") {
+    // This code only runs when the user clicks 'OK'
+
+    // Save horizontal textfield
+    characterCountInput = characterCountTextField.stringValue();
+    [userDefaults setObject: characterCountInput forKey: "characterCountInput"]; // Save to user defaults
+
+    // Save vertical textfield
+    characterInput = characterTextField.stringValue();
+    [userDefaults setObject: characterInput forKey: "characterInput"]; // Save to user defaults
+
+    // Save to user defaults
+    userDefaults.synchronize(); // save
+    return true;
+  } else {
+    return false;
+  }
+}
+
+/// Method used to create input window using "AppKit"
+function createWindow(context) {
+  initVars(context);
+
+  // Setup the window
+  var alert = COSAlertWindow.new();
+  alert.setMessageText("Add Your Text Choices")
+  alert.addButtonWithTitle("OK");
+  alert.addButtonWithTitle("Cancel");
+
+  // Create the main view
+  var viewWidth = 250;
+  var viewHeight = 100;
+  var viewSpacer = 10;
+  var view = NSView.alloc().initWithFrame(NSMakeRect(0, 0, viewWidth, viewHeight));
+  alert.addAccessoryView(view);
+
+  // Create labels
+  var infoLabel = NSTextField.alloc().initWithFrame(NSMakeRect(0, viewHeight - 33, (viewWidth - 20), 35));
+  var characterCountLabel = NSTextField.alloc().initWithFrame(NSMakeRect(-1, viewHeight - 55, (viewWidth / 2) - 30, 20));
+  var characterLabel = NSTextField.alloc().initWithFrame(NSMakeRect(130, viewHeight - 55, (viewWidth / 2) - 10, 20));
+
+  // Configure labels
+  infoLabel.setStringValue("Select Character count and Word");
+  infoLabel.setSelectable(false);
+  infoLabel.setEditable(false);
+  infoLabel.setBezeled(false);
+  infoLabel.setDrawsBackground(false);
+
+  characterCountLabel.setStringValue("Character Count");
+  characterCountLabel.setSelectable(false);
+  characterCountLabel.setEditable(false);
+  characterCountLabel.setBezeled(false);
+  characterCountLabel.setDrawsBackground(false);
+
+  characterLabel.setStringValue("Word");
+  characterLabel.setSelectable(false);
+  characterLabel.setEditable(false);
+  characterLabel.setBezeled(false);
+  characterLabel.setDrawsBackground(false);
+
+  // Add labels
+  view.addSubview(infoLabel);
+  view.addSubview(characterCountLabel);
+  view.addSubview(characterLabel);
+
+  // Create textfields
+  characterCountTextField = NSTextField.alloc().initWithFrame(NSMakeRect(0, viewHeight - 75, 120, 20));
+  characterTextField = NSTextField.alloc().initWithFrame(NSMakeRect(130, viewHeight - 75, 130, 20));
+
+  // Optional: Make TAB key work to switch between textfields
+  [characterCountTextField setNextKeyView: characterTextField];
+  characterCountTextField.setStringValue("5");
+  characterTextField.setStringValue("A");
+
+  // Add textfields
+  view.addSubview(characterCountTextField);
+  view.addSubview(characterTextField);
+
+  // Show the dialog window
+  return [alert];
+}
+
+/// Method used to get character counts
+function getCharacterCountValue(context) {
+  // Gets and returns saved setting
+  // If there is no saved setting, return default
+  var horizontalValue = userDefaults.objectForKey("characterCountInput");
+  if (horizontalValue != undefined) {
+    return horizontalValue
+  } else {
+    return "5" // Default value
+  }
+}
+
+/// Method used to get characters
+function getCharacterValue(context) {
+  // Gets and returns saved setting
+  // If there is no saved setting, return default
+  var verticalValue = userDefaults.objectForKey("characterInput");
+  if (verticalValue != undefined) {
+    return verticalValue
+  } else {
+    return "A" // Default value
+  }
+}

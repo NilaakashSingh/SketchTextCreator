@@ -1,0 +1,18 @@
+
+{
+    "name" : "Text Creator",
+    "identifier" : "neel.textCreator",
+    "version" : "1.0",
+    "description" : "Sketch plugin to create text with limit from user input",
+    "authorEmail" : "singhnilaakash@gmail.com",
+    "author" : "Nilaakash Singh",
+    "commands" : [
+    {
+      "script" : "TextCreator.cocoascript",
+      "handler" : "onRun",
+      "shortcut" : "command shift i",
+      "name" : "Created Text",
+      "identifier" : "com.neel.textCreator"
+    }
+  ]
+}
