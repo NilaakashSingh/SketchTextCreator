@@ -132,8 +132,8 @@ function createWindow(context) {
 
   // Optional: Make TAB key work to switch between textfields
   [characterCountTextField setNextKeyView: characterTextField];
-  characterCountTextField.setStringValue("5");
-  characterTextField.setStringValue("A");
+  characterCountTextField.setStringValue(getCharacterCountValue(context));
+  characterTextField.setStringValue(getCharacterValue(context));
 
   // Add textfields
   view.addSubview(characterCountTextField);
